@@ -26,5 +26,10 @@ export const TABLES = {
   USER_REGISTRATION_REQUESTS: 'user_registration_requests',
   PANCHAYATH_NOTES: 'panchayath_notes',
   TEAM_LEADERS: 'team_leaders',
-  TEAM_LEADER_PANCHAYATHS: 'team_leader_panchayaths'
+  TEAM_LEADER_PANCHAYATHS: 'team_leader_panchayaths',
+  ADMIN_USERS: 'admin_users',
+  ADMIN_PERMISSIONS: 'admin_permissions',
+  ADMIN_USER_PERMISSIONS: 'admin_user_permissions',
+  SYSTEM_SETTINGS: 'system_settings',
+  AUDIT_LOGS: 'audit_logs'
 } as const;

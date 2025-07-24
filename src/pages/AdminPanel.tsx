@@ -1,29 +1,35 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Settings, Users, LogOut, MapPin, UserCheck, Shield } from "lucide-react";
+import { ArrowLeft, Settings, Users, LogOut, MapPin, UserCheck, Shield, Activity, BarChart3, Database } from "lucide-react";
 import { Link } from "react-router-dom";
 import { TeamManagementNew } from "@/components/TeamManagementNew";
 import { AddPanchayathForm } from "@/components/AddPanchayathForm";
 import { useAuth } from "@/components/AuthProvider";
 import LoginForm from "@/components/LoginForm";
 import { AdminApprovalPanel } from "@/components/AdminApprovalPanel";
-import { UserManagement } from "@/components/UserManagement";
-import { AdminPermissionsManager } from "@/components/AdminPermissionsManager";
 import { TeamPasswordManager } from "@/components/TeamPasswordManager";
+import { AdminDashboard } from "@/components/AdminDashboard";
+import { AdminUserManagement } from "@/components/AdminUserManagement";
+import { SystemSettings } from "@/components/SystemSettings";
+import { AuditLogs } from "@/components/AuditLogs";
+import { SystemReports } from "@/components/SystemReports";
 
 const AdminPanelContent = () => {
   const { user, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   if (!user) {
     return <LoginForm />;
   }
 
+  const isSuperAdmin = 'role' in user && user.role === 'super_admin';
+  const isAdmin = 'role' in user && ['admin', 'super_admin'].includes(user.role);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <div className="flex justify-between items-start mb-4">
             <Link to="/">
@@ -49,16 +55,24 @@ const AdminPanelContent = () => {
             <Settings className="h-8 w-8 text-blue-600" />
             Admin Panel
           </h1>
-          <p className="text-gray-600">Manage system settings and configurations</p>
+          <p className="text-gray-600">Comprehensive system administration and management</p>
         </div>
 
         <Card>
           <CardContent className="p-6">
-            <Tabs defaultValue="teams" className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-8">
+                <TabsTrigger value="dashboard" className="flex items-center gap-2">
+                  <Database className="h-4 w-4" />
+                  Dashboard
+                </TabsTrigger>
+                <TabsTrigger value="users" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Admin Users
+                </TabsTrigger>
                 <TabsTrigger value="teams" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  Management Teams
+                  Teams
                 </TabsTrigger>
                 <TabsTrigger value="panchayaths" className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
@@ -66,35 +80,42 @@ const AdminPanelContent = () => {
                 </TabsTrigger>
                 <TabsTrigger value="approvals" className="flex items-center gap-2">
                   <UserCheck className="h-4 w-4" />
-                  Guest Approvals
-                </TabsTrigger>
-                <TabsTrigger value="permissions" className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Permissions
-                </TabsTrigger>
-                <TabsTrigger value="teamauth" className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Team Auth
+                  Approvals
                 </TabsTrigger>
                 <TabsTrigger value="settings" className="flex items-center gap-2">
                   <Settings className="h-4 w-4" />
-                  System Settings
+                  Settings
+                </TabsTrigger>
+                <TabsTrigger value="audit" className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  Audit Logs
+                </TabsTrigger>
+                <TabsTrigger value="reports" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Reports
                 </TabsTrigger>
               </TabsList>
               
+              <TabsContent value="dashboard" className="mt-6">
+                <AdminDashboard />
+              </TabsContent>
+              
+              {isSuperAdmin && (
+                <TabsContent value="users" className="mt-6">
+                  <AdminUserManagement />
+                </TabsContent>
+              )}
+              
               <TabsContent value="teams" className="mt-6">
-                <TeamManagementNew />
+                <div className="space-y-6">
+                  <TeamManagementNew />
+                  <TeamPasswordManager />
+                </div>
               </TabsContent>
               
               <TabsContent value="panchayaths" className="mt-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Panchayath Management</CardTitle>
-                    <CardDescription>
-                      Add and manage panchayaths in the system
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     <AddPanchayathForm />
                   </CardContent>
                 </Card>
@@ -104,26 +125,18 @@ const AdminPanelContent = () => {
                 <AdminApprovalPanel />
               </TabsContent>
               
-              <TabsContent value="permissions" className="mt-6">
-                <AdminPermissionsManager />
-              </TabsContent>
-              
-              <TabsContent value="teamauth" className="mt-6">
-                <TeamPasswordManager />
-              </TabsContent>
-              
               <TabsContent value="settings" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>System Settings</CardTitle>
-                    <CardDescription>
-                      Create and manage team management users with access permissions
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <UserManagement />
-                  </CardContent>
-                </Card>
+                <SystemSettings />
+              </TabsContent>
+              
+              {isAdmin && (
+                <TabsContent value="audit" className="mt-6">
+                  <AuditLogs />
+                </TabsContent>
+              )}
+              
+              <TabsContent value="reports" className="mt-6">
+                <SystemReports />
               </TabsContent>
             </Tabs>
           </CardContent>
